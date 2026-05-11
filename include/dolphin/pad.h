@@ -34,12 +34,14 @@
 #define PAD_TRIGGER_Z 0x0010
 #define PAD_TRIGGER_R 0x0020
 #define PAD_TRIGGER_L 0x0040
+#define PAD_TRIGGER_ZL 0x0080
 #define PAD_BUTTON_A 0x0100
 #define PAD_BUTTON_B 0x0200
 #define PAD_BUTTON_X 0x0400
 #define PAD_BUTTON_Y 0x0800
 #define PAD_BUTTON_MENU 0x1000
 #define PAD_BUTTON_START 0x1000
+#define PAD_BUTTON_MINUS 0x2000
 #ifdef TARGET_PC
 #define PAD_BUTTON_BACK 0x0002000
 #define PAD_BUTTON_GUIDE 0x0004000
@@ -59,7 +61,7 @@
 #define PAD_EXT_BUTTON_COUNT 15
 #endif
 
-#define PAD_BUTTON_COUNT 12
+#define PAD_BUTTON_COUNT 14
 
 // added by Aurora, not present in original SDK
 #define PAD_AXIS_LEFT_X_POS 0
