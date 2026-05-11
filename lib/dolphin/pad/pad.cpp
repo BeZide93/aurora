@@ -9,7 +9,7 @@
 #include <ranges>
 
 namespace {
-constexpr int32_t k_mappingsFileVersion = 3;
+constexpr int32_t k_mappingsFileVersion = 4;
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsStandard{{
     {SDL_GAMEPAD_BUTTON_SOUTH, PAD_BUTTON_A},
@@ -24,6 +24,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsStandard{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsXBox360{{
@@ -39,6 +41,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsXBox360{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsXBoxOne{{
@@ -54,6 +58,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsXBoxOne{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsPS3{{
@@ -69,6 +75,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsPS3{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsPS4{{
@@ -84,6 +92,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsPS4{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsPS5{{
@@ -99,6 +109,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsPS5{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsGamecube{{
@@ -114,6 +126,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsGamecube{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsNSOGamecube{{
@@ -129,6 +143,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsNSOGamecube{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsProCon{{
@@ -144,6 +160,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsProCon{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsJoyConRight{{
@@ -159,6 +177,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsJoyConRight{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsJoyConLeft{{
@@ -174,6 +194,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsJoyConLeft{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsJoyPair{{
@@ -189,6 +211,8 @@ std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsJoyPair{{
     {SDL_GAMEPAD_BUTTON_DPAD_DOWN, PAD_BUTTON_DOWN},
     {SDL_GAMEPAD_BUTTON_DPAD_LEFT, PAD_BUTTON_LEFT},
     {SDL_GAMEPAD_BUTTON_DPAD_RIGHT, PAD_BUTTON_RIGHT},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_BUTTON_MINUS},
+    {PAD_NATIVE_BUTTON_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADKeyButtonBinding, PAD_BUTTON_COUNT> g_defaultKeys{{
@@ -204,6 +228,8 @@ std::array<PADKeyButtonBinding, PAD_BUTTON_COUNT> g_defaultKeys{{
     {PAD_KEY_INVALID, PAD_BUTTON_DOWN},
     {PAD_KEY_INVALID, PAD_BUTTON_LEFT},
     {PAD_KEY_INVALID, PAD_BUTTON_RIGHT},
+    {PAD_KEY_INVALID, PAD_BUTTON_MINUS},
+    {PAD_KEY_INVALID, PAD_TRIGGER_ZL},
 }};
 
 std::array<PADKeyAxisBinding, PAD_AXIS_COUNT> g_defaultKeyAxis{{
@@ -1155,7 +1181,7 @@ void PADClearKeyBindings(const u32 port) {
 }
 
 constexpr uint32_t k_keyboardMagic = SBIG('KBND');
-constexpr int32_t k_keyboardVersion = 3;
+constexpr int32_t k_keyboardVersion = 4;
 
 static void load_keyboard_bindings() {
   const auto filePath = std::filesystem::path{aurora::g_config.userPath} / "keyboard_bindings.dat";
@@ -1324,11 +1350,13 @@ static constexpr std::array<std::pair<PADButton, std::string_view>, PAD_BUTTON_C
     {PAD_TRIGGER_Z, "Z"sv},
     {PAD_TRIGGER_R, "R"sv},
     {PAD_TRIGGER_L, "L"sv},
+    {PAD_TRIGGER_ZL, "ZL"sv},
     {PAD_BUTTON_A, "A"sv},
     {PAD_BUTTON_B, "B"sv},
     {PAD_BUTTON_X, "X"sv},
     {PAD_BUTTON_Y, "Y"sv},
     {PAD_BUTTON_START, "Start"sv},
+    {PAD_BUTTON_MINUS, "Minus"sv},
 }};
 
 static constexpr std::array<std::pair<PADButton, std::string_view>, PAD_AXIS_COUNT> skAxisNames = {{
