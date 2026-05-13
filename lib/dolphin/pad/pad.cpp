@@ -464,6 +464,33 @@ void __PADSetDefaultMapping(aurora::input::GameController* controller) {
   }
 }
 
+static PADButtonMapping* find_button_mapping(aurora::input::GameController* controller, PADButton button) {
+  auto iter = std::find_if(controller->m_buttonMapping.begin(), controller->m_buttonMapping.end(),
+                           [button](const auto& mapping) { return mapping.padButton == button; });
+  return iter == controller->m_buttonMapping.end() ? nullptr : &*iter;
+}
+
+static void __PADApplyDuskButtonMappingDefaults(aurora::input::GameController* controller) {
+  PADButtonMapping* zl = find_button_mapping(controller, PAD_TRIGGER_ZL);
+  if (zl == nullptr) {
+    return;
+  }
+
+  PADButtonMapping* a = find_button_mapping(controller, PAD_BUTTON_A);
+  const bool zlOnA = a != nullptr && a->nativeButton != PAD_NATIVE_BUTTON_INVALID && zl->nativeButton == a->nativeButton;
+  PADButtonMapping* l = find_button_mapping(controller, PAD_TRIGGER_L);
+  if (zlOnA) {
+    zl->nativeButton = PAD_NATIVE_BUTTON_INVALID;
+  }
+
+  if (zl->nativeButton == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
+    if (l != nullptr) {
+      l->nativeButton = SDL_GAMEPAD_BUTTON_LEFT_SHOULDER;
+    }
+    zl->nativeButton = PAD_NATIVE_BUTTON_INVALID;
+  }
+}
+
 void __PADLoadMapping(aurora::input::GameController* controller) {
   int32_t playerIndex = SDL_GetGamepadPlayerIndex(controller->m_controller);
   if (playerIndex == -1) {
@@ -482,6 +509,7 @@ void __PADLoadMapping(aurora::input::GameController* controller) {
                           controller->m_pid);
   SDL_IOStream* file = SDL_IOFromFile(path.c_str(), "rb");
   if (file == nullptr) {
+    __PADApplyDuskButtonMappingDefaults(controller);
     return;
   }
 
@@ -489,6 +517,7 @@ void __PADLoadMapping(aurora::input::GameController* controller) {
   SDL_ReadU32LE(file, &magic);
   if (magic != SBIG('CTRL')) {
     aurora::input::Log.warn("Invalid controller mapping magic!");
+    __PADApplyDuskButtonMappingDefaults(controller);
     return;
   }
 
@@ -497,6 +526,7 @@ void __PADLoadMapping(aurora::input::GameController* controller) {
   if (version != k_mappingsFileVersion) {
     aurora::input::Log.warn("Invalid controller mapping version! (Expected {0}, found {1})", k_mappingsFileVersion,
                             version);
+    __PADApplyDuskButtonMappingDefaults(controller);
     return;
   }
 
@@ -545,6 +575,7 @@ void __PADLoadMapping(aurora::input::GameController* controller) {
                             playerIndex);
     __PADSetDefaultMapping(controller);
   }
+  __PADApplyDuskButtonMappingDefaults(controller);
 }
 
 static void EnsureMappingLoaded(aurora::input::GameController* controller) {
@@ -1443,6 +1474,7 @@ void PADRestoreDefaultMapping(uint32_t port) {
     return;
   }
   __PADSetDefaultMapping(controller);
+  __PADApplyDuskButtonMappingDefaults(controller);
   controller->m_axisMapping = g_defaultAxes;
 }
 
