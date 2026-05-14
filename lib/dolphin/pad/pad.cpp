@@ -13,6 +13,8 @@
 namespace {
 constexpr int32_t k_mappingsFileVersion = 4;
 constexpr int32_t k_minMappingsFileVersion = 3;
+constexpr int32_t k_legacyMappingsFileVersion = 3;
+constexpr uint32_t k_legacyMappingsButtonCount = 12;
 
 std::array<PADButtonMapping, PAD_BUTTON_COUNT> g_defaultButtonsStandard{{
     {SDL_GAMEPAD_BUTTON_SOUTH, PAD_BUTTON_A},
@@ -568,7 +570,6 @@ void __PADLoadMapping(aurora::input::GameController* controller) /*  NOLINT(*-re
                                 controller->m_pid);
   SDL_IOStream* file = SDL_IOFromFile(path.c_str(), "rb");
   if (file == nullptr) {
-    __PADApplyDuskButtonMappingDefaults(controller);
     return;
   }
 
@@ -576,18 +577,20 @@ void __PADLoadMapping(aurora::input::GameController* controller) /*  NOLINT(*-re
   SDL_ReadU32LE(file, &magic);
   if (magic != SBIG('CTRL')) {
     aurora::input::Log.warn("Invalid controller mapping magic!");
-    __PADApplyDuskButtonMappingDefaults(controller);
+    SDL_CloseIO(file);
     return;
   }
 
   uint32_t version = 0;
   SDL_ReadU32LE(file, &version);
+  const bool legacyV3Mapping = version == k_legacyMappingsFileVersion;
   if (version < k_minMappingsFileVersion || version > k_mappingsFileVersion) {
     aurora::input::Log.warn("Invalid controller mapping version! (Expected {0}..{1}, found {2})",
                             k_minMappingsFileVersion, k_mappingsFileVersion, version);
-    __PADApplyDuskButtonMappingDefaults(controller);
+    SDL_CloseIO(file);
     return;
   }
+  const uint32_t mappingButtonCount = legacyV3Mapping ? k_legacyMappingsButtonCount : PAD_BUTTON_COUNT;
 
   bool isGameCube = false;
   SDL_ReadIO(file, &isGameCube, sizeof(bool));
@@ -595,17 +598,18 @@ void __PADLoadMapping(aurora::input::GameController* controller) /*  NOLINT(*-re
   const auto dataStart = SDL_TellIO(file);
   if (dataStart == -1) {
     aurora::input::Log.warn("Unable to seek in controller bindings! Path: \"{}\"", path);
+    SDL_CloseIO(file);
     return;
   }
   if (isGameCube) {
     constexpr uint32_t dzSecLen = sizeof(PADDeadZones);
-    constexpr uint32_t btnSecLen = sizeof(PADButtonMapping) * PAD_BUTTON_COUNT;
+    const uint32_t btnSecLen = sizeof(PADButtonMapping) * mappingButtonCount;
     constexpr uint32_t axisSecLen = sizeof(PADAxisMapping) * PAD_AXIS_COUNT;
     SDL_SeekIO(file, dataStart + (dzSecLen + btnSecLen + axisSecLen) * playerIndex, SDL_IO_SEEK_SET);
   }
 
   SDL_ReadIO(file, &controller->m_deadZones, sizeof(PADDeadZones));
-  SDL_ReadIO(file, &controller->m_buttonMapping, sizeof(PADButtonMapping) * PAD_BUTTON_COUNT);
+  SDL_ReadIO(file, controller->m_buttonMapping.data(), sizeof(PADButtonMapping) * mappingButtonCount);
   SDL_ReadIO(file, &controller->m_axisMapping, sizeof(PADAxisMapping) * PAD_AXIS_COUNT);
   if (!isGameCube) {
     SDL_ReadIO(file, &controller->m_rumbleIntensityLow, sizeof(u16));
@@ -641,7 +645,6 @@ void __PADLoadMapping(aurora::input::GameController* controller) /*  NOLINT(*-re
                             playerIndex);
     __PADSetDefaultMapping(controller);
   }
-  __PADApplyDuskButtonMappingDefaults(controller);
 }
 
 static void EnsureMappingLoaded(aurora::input::GameController* controller) {
