@@ -614,6 +614,22 @@ static Sint16 _get_axis_value(const aurora::input::GameController* controller, /
   return 0;
 }
 
+static bool native_button_mapping_held(const aurora::input::GameController* controller,
+                                       const PADButtonMapping& mapping) {
+  switch (mapping.nativeButton) {
+  case PAD_NATIVE_BUTTON_INVALID:
+    return false;
+  case PAD_NATIVE_BUTTON_AXIS_LEFT_TRIGGER:
+    return SDL_GetGamepadAxis(controller->m_controller, SDL_GAMEPAD_AXIS_LEFT_TRIGGER) >
+           controller->m_deadZones.leftTriggerActivationZone;
+  case PAD_NATIVE_BUTTON_AXIS_RIGHT_TRIGGER:
+    return SDL_GetGamepadAxis(controller->m_controller, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) >
+           controller->m_deadZones.rightTriggerActivationZone;
+  default:
+    return SDL_GetGamepadButton(controller->m_controller, static_cast<SDL_GamepadButton>(mapping.nativeButton)) != 0u;
+  }
+}
+
 static void neutralize_status(PADStatus& status) {
   status.button = 0;
   status.stickX = 0;
@@ -747,7 +763,7 @@ u32 PADRead(PADStatus* status) {
       bool rightTriggerSet = false;
       std::ranges::for_each(controller->m_buttonMapping, [&controller, &i, &status, &leftTriggerSet,
                                                           &rightTriggerSet](const auto& mapping) {
-        if (SDL_GetGamepadButton(controller->m_controller, static_cast<SDL_GamepadButton>(mapping.nativeButton))) {
+        if (native_button_mapping_held(controller, mapping)) {
           status[i].button |= mapping.padButton;
         }
 
@@ -1428,6 +1444,14 @@ const char* PADGetButtonName(const PADButton button) {
 }
 
 const char* PADGetNativeButtonName(u32 button) {
+  switch (button) {
+  case PAD_NATIVE_BUTTON_AXIS_LEFT_TRIGGER:
+    return SDL_GetGamepadStringForAxis(SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
+  case PAD_NATIVE_BUTTON_AXIS_RIGHT_TRIGGER:
+    return SDL_GetGamepadStringForAxis(SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
+  default:
+    break;
+  }
   return SDL_GetGamepadStringForButton(static_cast<SDL_GamepadButton>(button));
 }
 
