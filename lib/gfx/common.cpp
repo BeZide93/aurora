@@ -950,25 +950,23 @@ bool bind_pipeline(PipelineRef ref, const wgpu::RenderPassEncoder& pass) {
 
 static inline Range push(ByteBuffer& target, const uint8_t* data, size_t length, size_t alignment,
                          size_t readGuardBytes = 0) {
-  size_t padding = 0;
-  if (alignment != 0) {
-    const size_t remainder = length % alignment;
-    if (remainder != 0) {
-      padding = alignment - remainder;
-    }
-  }
   auto begin = target.size();
   if (length == 0) {
     length = alignment;
     target.append_zeroes(alignment);
   } else {
     target.append(data, length);
-    if (padding > 0) {
-      target.append_zeroes(padding);
-    }
   }
   if (readGuardBytes > 0) {
     target.append_zeroes(readGuardBytes);
+  }
+  size_t padding = 0;
+  if (alignment != 0) {
+    const size_t remainder = (target.size() - begin) % alignment;
+    if (remainder != 0) {
+      padding = alignment - remainder;
+      target.append_zeroes(padding);
+    }
   }
   return {static_cast<uint32_t>(begin), static_cast<uint32_t>(length + padding)};
 }
