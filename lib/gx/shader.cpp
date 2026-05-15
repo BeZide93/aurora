@@ -619,13 +619,19 @@ auto attr_load(const ShaderConfig& config, GXAttr attr, std::string_view vidx) -
   auto offs = fmt::format("ubuf.vtx_start + {} * {}u + {}u", vidx, config.vtxStride, mapping.offset);
   auto le = false; // Vertex buffer is always big endian (for now)
   if (mapping.attrType == GX_INDEX8) {
-    offs = fmt::format("ubuf.array_start[{}] + raw_fetch_u8_1(&{}, {}) * {}u", attr - GX_VA_POS, buf, offs,
-                       mapping.stride);
+    const u32 attrIdx = attr - GX_VA_POS;
+    const u32 readSize = comp_type_size(attr, static_cast<GXCompType>(mapping.compType)) * mapping.cnt;
+    offs = fmt::format(
+        "ubuf.array_start[{0}] + min(raw_fetch_u8_1(&{1}, {2}), array_max_index({0}u, {3}u, {4}u)) * {4}u",
+        attrIdx, buf, offs, readSize, mapping.stride);
     buf = "abuf"sv;
     le = mapping.le;
   } else if (mapping.attrType == GX_INDEX16) {
-    offs = fmt::format("ubuf.array_start[{}] + raw_fetch_u16_1(&{}, {}, {}) * {}u", attr - GX_VA_POS, buf, offs, le,
-                       mapping.stride);
+    const u32 attrIdx = attr - GX_VA_POS;
+    const u32 readSize = comp_type_size(attr, static_cast<GXCompType>(mapping.compType)) * mapping.cnt;
+    offs = fmt::format(
+        "ubuf.array_start[{0}] + min(raw_fetch_u16_1(&{1}, {2}, {3}), array_max_index({0}u, {4}u, {5}u)) * {5}u",
+        attrIdx, buf, offs, le, readSize, mapping.stride);
     buf = "abuf"sv;
     le = mapping.le;
   }
@@ -838,6 +844,15 @@ wgpu::ShaderModule build_shader(const ShaderConfig& config) noexcept {
   std::string uniformPre;
   std::string uniBufAttrs;
   std::string texBindings;
+  const std::string postUniformDecls = R"(
+fn array_max_index(attr: u32, read_size: u32, stride: u32) -> u32 {
+  let size = ubuf.array_size[attr];
+  if (stride == 0u || size <= read_size) {
+    return 0u;
+  }
+  return (size - read_size) / stride;
+}
+)";
   std::string vtxOutAttrs;
   std::string vtxInAttrs;
   std::string vtxXfrAttrsPre;
@@ -1779,7 +1794,8 @@ struct Uniform {{
     render_viewport_size: vec2f,
     logical_viewport_size: vec2f,
     pad: vec2u,
-    array_start: array<u32, 12>,{0}
+    array_start: array<u32, 12>,
+    array_size: array<u32, 12>,{0}
 }};
 @group(0) @binding(0)
 var<storage, read> vbuf: array<u32>;
@@ -1805,8 +1821,8 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4f {{{6}{5}
     return prev;
 }}
 )""",
-                                        uniBufAttrs, texBindings, vtxOutAttrs, vtxInAttrs, vtxXfrAttrs, fragmentFn,
-                                        fragmentFnPre, vtxXfrAttrsPre, uniformPre);
+                                        uniBufAttrs, postUniformDecls + texBindings, vtxOutAttrs, vtxInAttrs,
+                                        vtxXfrAttrs, fragmentFn, fragmentFnPre, vtxXfrAttrsPre, uniformPre);
   if (EnableDebugPrints) {
     Log.info("Generated shader: {}", shaderSource);
   }

@@ -177,8 +177,8 @@ ShaderInfo build_shader_info(const ShaderConfig& config) noexcept {
   ZoneScoped;
 
   ShaderInfo info{
-      // vtx_start, current_pnmtx, render/logical viewport size, array_start, pad, proj
-      .uniformSize = 4 + 4 + 8 + 8 + 8 + 48 + 64,
+      // vtx_start, current_pnmtx, render/logical viewport size, array_start, array_size, pad, proj
+      .uniformSize = 4 + 4 + 8 + 8 + 8 + 48 + 48 + 64,
   };
 
   if (config.lineMode != 0) {
@@ -365,6 +365,9 @@ gfx::Range build_uniform(const ShaderInfo& info, u32 vtxStart, const BindGroupRa
   buf.append_zeroes(8); // pad
   for (const auto& vaRange : ranges.vaRanges) {
     buf.append<u32>(vaRange.offset);
+  }
+  for (const auto& vaRange : ranges.vaRanges) {
+    buf.append<u32>(vaRange.size);
   }
   if (info.lineMode != 0) {
     if (info.lineMode == 3) { // GX_POINTS
