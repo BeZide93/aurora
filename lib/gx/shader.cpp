@@ -529,7 +529,7 @@ static inline std::string vtx_attr(const ShaderConfig& config, GXAttr attr) {
   const auto type = config.attrs[attr].attrType;
   if (type == GX_NONE) {
     if (attr == GX_VA_PNMTXIDX) {
-      return "ubuf.current_pnmtx";
+      return fmt::format("min(ubuf.current_pnmtx, {}u)", MaxPnMtx - 1);
     }
     if (attr == GX_VA_NRM) {
       // Default normal
@@ -631,7 +631,7 @@ auto attr_load(const ShaderConfig& config, GXAttr attr, std::string_view vidx) -
   }
   switch (attr) {
   case GX_VA_PNMTXIDX:
-    return fmt::format("(raw_fetch_u8_1(&{}, {}) / 3u)", buf, offs);
+    return fmt::format("min((raw_fetch_u8_1(&{}, {}) / 3u), {}u)", buf, offs, MaxPnMtx - 1);
   case GX_VA_TEX0MTXIDX:
   case GX_VA_TEX1MTXIDX:
   case GX_VA_TEX2MTXIDX:

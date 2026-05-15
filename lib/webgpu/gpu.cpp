@@ -537,7 +537,9 @@ bool initialize(AuroraBackend auroraBackend) {
 #endif
 #ifdef NDEBUG
       "skip_validation",
+#ifndef ANDROID
       "disable_robustness",
+#endif
 #endif
 #ifndef ANDROID
       "use_user_defined_labels_in_backend",
