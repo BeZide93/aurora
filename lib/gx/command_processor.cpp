@@ -1564,6 +1564,7 @@ static void handle_draw(u8 cmd, const u8* data, u32& pos, u32 size, bool bigEndi
   gfx::Range vertRange = gfx::push_verts(data + pos, totalVtxBytes);
   pos += totalVtxBytes;
 
+#ifndef ANDROID
   // Try to merge with previous draw call
   if (!g_gxState.stateDirty) LIKELY {
     auto* lastDraw = gfx::get_last_draw_command<DrawData>();
@@ -1587,6 +1588,7 @@ static void handle_draw(u8 cmd, const u8* data, u32& pos, u32 size, bool bigEndi
       return;
     }
   }
+#endif
 
   handle_draw_unmerged(prim, fmt, vtxCount, vertRange);
 }
@@ -1616,7 +1618,8 @@ static void handle_draw_unmerged(GXPrimitive prim, GXVtxFmt fmt, u16 vtxCount, g
     if (array.cachedRange.size > 0) {
       ranges.vaRanges[i - GX_VA_POS] = array.cachedRange;
     } else {
-      const auto range = gfx::push_storage(static_cast<const uint8_t*>(array.data), array.size);
+      auto range = gfx::push_storage(static_cast<const uint8_t*>(array.data), array.size);
+      range.size = array.size;
       ranges.vaRanges[i - GX_VA_POS] = range;
       array.cachedRange = range;
     }

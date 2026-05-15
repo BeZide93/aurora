@@ -948,7 +948,8 @@ bool bind_pipeline(PipelineRef ref, const wgpu::RenderPassEncoder& pass) {
   return true;
 }
 
-static inline Range push(ByteBuffer& target, const uint8_t* data, size_t length, size_t alignment) {
+static inline Range push(ByteBuffer& target, const uint8_t* data, size_t length, size_t alignment,
+                         size_t readGuardBytes = 0) {
   size_t padding = 0;
   if (alignment != 0) {
     const size_t remainder = length % alignment;
@@ -965,6 +966,9 @@ static inline Range push(ByteBuffer& target, const uint8_t* data, size_t length,
     if (padding > 0) {
       target.append_zeroes(padding);
     }
+  }
+  if (readGuardBytes > 0) {
+    target.append_zeroes(readGuardBytes);
   }
   return {static_cast<uint32_t>(begin), static_cast<uint32_t>(length + padding)};
 }
@@ -983,13 +987,19 @@ static inline Range map(ByteBuffer& target, size_t length, size_t alignment) {
   target.append_zeroes(length + padding);
   return {static_cast<uint32_t>(begin), static_cast<uint32_t>(length + padding)};
 }
-Range push_verts(const uint8_t* data, size_t length) { return push(g_verts, data, length, 0); }
+#ifdef ANDROID
+constexpr size_t VertexPullReadGuardBytes = 16;
+#else
+constexpr size_t VertexPullReadGuardBytes = 0;
+#endif
+
+Range push_verts(const uint8_t* data, size_t length) { return push(g_verts, data, length, 0, VertexPullReadGuardBytes); }
 Range push_indices(const uint8_t* data, size_t length) { return push(g_indices, data, length, 0); }
 Range push_uniform(const uint8_t* data, size_t length) {
   return push(g_uniforms, data, length, g_cachedLimits.minUniformBufferOffsetAlignment);
 }
 Range push_storage(const uint8_t* data, size_t length) {
-  return push(g_storage, data, length, g_cachedLimits.minStorageBufferOffsetAlignment);
+  return push(g_storage, data, length, g_cachedLimits.minStorageBufferOffsetAlignment, VertexPullReadGuardBytes);
 }
 Range push_texture_data(const uint8_t* data, size_t length, u32 bytesPerRow, u32 rowsPerImage) {
   // For CopyBufferToTexture, we need an alignment of 256 per row (see Dawn kTextureBytesPerRowAlignment)
