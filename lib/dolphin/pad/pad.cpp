@@ -544,7 +544,8 @@ static void __PADApplyDuskButtonMappingDefaults(aurora::input::GameController* c
     zl->nativeButton = PAD_NATIVE_BUTTON_INVALID;
   }
 
-  if (zl->nativeButton == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
+  const bool zlOnL = l != nullptr && l->nativeButton != PAD_NATIVE_BUTTON_INVALID && zl->nativeButton == l->nativeButton;
+  if (zlOnL || zl->nativeButton == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
     if (l != nullptr) {
       l->nativeButton = SDL_GAMEPAD_BUTTON_LEFT_SHOULDER;
     }
@@ -645,6 +646,8 @@ void __PADLoadMapping(aurora::input::GameController* controller) /*  NOLINT(*-re
                             playerIndex);
     __PADSetDefaultMapping(controller);
   }
+
+  __PADApplyDuskButtonMappingDefaults(controller);
 }
 
 static void EnsureMappingLoaded(aurora::input::GameController* controller) {
